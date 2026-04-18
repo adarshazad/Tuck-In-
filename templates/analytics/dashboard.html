@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %}Analytics — Tuck In{% endblock %}
+{% block page_title %}Analytics & Visualization{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Summary stats -->
+<div class="stats-grid" style="margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#dce8ff;color:#1e3a7a;"><i class="fas fa-ticket"></i></div>
+    <div><div class="stat-value">{{ total_tickets }}</div><div class="stat-label">Total Tickets</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#fef3cd;color:#b45309;"><i class="fas fa-folder-open"></i></div>
+    <div><div class="stat-value">{{ open_tickets }}</div><div class="stat-label">Open Tickets</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#dcfce7;color:#15803d;"><i class="fas fa-check-circle"></i></div>
+    <div><div class="stat-value">{{ resolved_tickets }}</div><div class="stat-label">Resolved</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#e0faf7;color:#0d9488;"><i class="fas fa-percent"></i></div>
+    <div>
+      <div class="stat-value">{% if total_tickets %}{{ resolved_tickets|floatformat:0 }}%{% else %}0%{% endif %}</div>
+      <div class="stat-label">Resolution Rate</div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts row 1 -->
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px;">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="fas fa-chart-line" style="color:#3b6dd4;margin-right:8px;"></i>Ticket Trend (Last 30 Days)</span>
+    </div>
+    <div class="card-body">
+      <canvas id="trendChart" height="100"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="fas fa-chart-pie" style="color:#3b6dd4;margin-right:8px;"></i>Status Distribution</span>
+    </div>
+    <div class="card-body">
+      <canvas id="statusChart" height="160"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Charts row 2 -->
+<div style="display:grid;grid-template-columns:1fr;gap:20px;margin-bottom:20px;">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="fas fa-user-tie" style="color:#3b6dd4;margin-right:8px;"></i>Agent Performance</span>
+    </div>
+    <div class="card-body">
+      {% if agent_perf %}
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        {% for agent in agent_perf %}
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px;">
+            <span style="font-weight:600;color:#0a1628;">{{ agent.assigned_to__username }}</span>
+            <span style="color:#7a93be;">{{ agent.resolved }}/{{ agent.total }} resolved</span>
+          </div>
+          <div style="height:7px;background:#f1f5fb;border-radius:10px;overflow:hidden;">
+            <div style="height:100%;width:{% if agent.total %}{% widthratio agent.resolved agent.total 100 %}{% else %}0{% endif %}%;background:linear-gradient(90deg,#1e3a7a,#3b6dd4);border-radius:10px;transition:width .6s;"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state" style="padding:30px 20px;">
+        <i class="fas fa-user-tie"></i>
+        <h3>No agent data</h3>
+        <p>Assign tickets to agents to see performance metrics.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const navy = '#1e3a7a';
+const navyLight = '#3b6dd4';
+const accent = '#00c9b1';
+const warning = '#f59e0b';
+const danger = '#e85555';
+const gray = '#e4ebf7';
+
+Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+Chart.defaults.color = '#7a93be';
+
+// Trend Chart
+const trendCtx = document.getElementById('trendChart').getContext('2d');
+const trendGrad = trendCtx.createLinearGradient(0, 0, 0, 250);
+trendGrad.addColorStop(0, 'rgba(30,58,122,0.2)');
+trendGrad.addColorStop(1, 'rgba(30,58,122,0)');
+
+new Chart(trendCtx, {
+  type: 'line',
+  data: {
+    labels: {{ trend_labels|safe }},
+    datasets: [{
+      label: 'Tickets Created',
+      data: {{ trend_data|safe }},
+      borderColor: navyLight,
+      backgroundColor: trendGrad,
+      borderWidth: 2.5,
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: navyLight,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gray }, ticks: { maxTicksLimit: 8 } },
+      y: { grid: { color: gray }, beginAtZero: true, ticks: { precision: 0 } }
+    }
+  }
+});
+
+// Status Doughnut
+new Chart(document.getElementById('statusChart'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ status_labels|safe }},
+    datasets: [{
+      data: {{ status_counts|safe }},
+      backgroundColor: [navy, navyLight, accent, gray],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '68%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, boxWidth: 12, borderRadius: 4 } }
+    }
+  }
+});
+
+</script>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — Tuck In{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:680px;">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">
+        <i class="fas fa-{% if ticket %}pen{% else %}plus-circle{% endif %}" style="color:#3b6dd4;margin-right:8px;"></i>
+        {{ title }}
+      </span>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Ticket Title *</label>
+          <input type="text" name="title" value="{{ form.title.value|default:'' }}"
+            placeholder="Brief description of the issue" required>
+          {% if form.title.errors %}
+          <div style="color:#e85555;font-size:12px;margin-top:4px;">{{ form.title.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label>Description *</label>
+          <textarea name="description" rows="6"
+            placeholder="Explain the issue in detail — what happened, steps to reproduce, expected behavior..."
+            required style="width:100%;padding:10px 14px;border:1.5px solid #e4ebf7;border-radius:8px;font-size:13.5px;font-family:inherit;outline:none;resize:vertical;">{{ form.description.value|default:'' }}</textarea>
+          {% if form.description.errors %}
+          <div style="color:#e85555;font-size:12px;margin-top:4px;">{{ form.description.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-row">
+          {% if user.role in 'admin,agent' %}
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              {% for val, label in form.fields.status.choices %}
+              <option value="{{ val }}" {% if form.status.value == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if user.role in 'admin,agent' %}
+        <div class="form-group">
+          <label>Assign To</label>
+          <select name="assigned_to">
+            <option value="">— Unassigned —</option>
+            {% for agent in form.fields.assigned_to.queryset %}
+            <option value="{{ agent.pk }}" {% if form.assigned_to.value|stringformat:'s' == agent.pk|stringformat:'s' %}selected{% endif %}>
+              {{ agent.username }} ({{ agent.role|title }})
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-{% if ticket %}save{% else %}paper-plane{% endif %}"></i>
+            {% if ticket %}Update Ticket{% else %}Submit Ticket{% endif %}
+          </button>
+          <a href="{% if ticket %}{% url 'tickets:detail' ticket.pk %}{% else %}{% url 'tickets:list' %}{% endif %}" class="btn btn-outline">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if not ticket %}
+  <div style="margin-top:16px;padding:14px 18px;background:#f1f5fb;border-radius:10px;border:1px solid #e4ebf7;">
+    <div style="font-size:13px;color:#3d5480;display:flex;align-items:flex-start;gap:10px;">
+      <i class="fas fa-lightbulb" style="color:#f59e0b;margin-top:2px;"></i>
+      <span><strong>Tip:</strong> Before creating a ticket, check our <a href="{% url 'knowledge:list' %}" style="color:#1e3a7a;font-weight:600;">Knowledge Base</a> — your answer might already be there!</span>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

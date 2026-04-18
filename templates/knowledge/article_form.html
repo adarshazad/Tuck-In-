@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — Tuck In{% endblock %}
+{% block page_title %}Knowledge Base{% endblock %}
+
+{% block content %}
+<div style="max-width:720px;">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">
+        <i class="fas fa-{% if article %}pen{% else %}plus-circle{% endif %}" style="color:#3b6dd4;margin-right:8px;"></i>
+        {{ title }}
+      </span>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Article Title *</label>
+          <input type="text" name="title" value="{{ form.title.value|default:'' }}"
+            placeholder="e.g. How to reset your password" required>
+        </div>
+
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category">
+            <option value="">— No Category —</option>
+            {% for cat in form.fields.category.queryset %}
+            <option value="{{ cat.pk }}" {% if form.category.value|stringformat:'s' == cat.pk|stringformat:'s' %}selected{% endif %}>
+              {{ cat.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Content *</label>
+          <textarea name="content" rows="14"
+            placeholder="Write your article content here. You can include step-by-step instructions, tips, and explanations..."
+            required
+            style="width:100%;padding:12px 14px;border:1.5px solid #e4ebf7;border-radius:8px;font-size:13.5px;font-family:inherit;outline:none;resize:vertical;line-height:1.7;">{{ form.content.value|default:'' }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:500;">
+            <input type="checkbox" name="is_published"
+              {% if form.is_published.value %}checked{% endif %}
+              style="width:16px;height:16px;cursor:pointer;">
+            Publish this article (visible to all users)
+          </label>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i>
+            {% if article %}Update Article{% else %}Publish Article{% endif %}
+          </button>
+          <a href="{% if article %}{% url 'knowledge:detail' article.pk %}{% else %}{% url 'knowledge:list' %}{% endif %}" class="btn btn-outline">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

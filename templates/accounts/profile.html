@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}My Profile — Tuck In{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div style="max-width:620px;">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="fas fa-user-circle" style="color:#3b6dd4;margin-right:8px;"></i>Profile Settings</span>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;align-items:center;gap:18px;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid #f1f5fb;">
+        <div style="width:68px;height:68px;background:linear-gradient(135deg,#1e3a7a,#2451a8);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:white;flex-shrink:0;">
+          {{ user.username|first|upper }}
+        </div>
+        <div>
+          <div style="font-size:19px;font-weight:700;color:#0a1628;">{{ user.get_full_name|default:user.username }}</div>
+          <div style="font-size:13px;color:#7a93be;margin-top:3px;">
+            <span style="background:#dce8ff;color:#1e3a7a;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">{{ user.role|title }}</span>
+            &nbsp;· Member since {{ user.date_joined|date:"F Y" }}
+          </div>
+        </div>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" name="first_name" value="{{ user.first_name }}" placeholder="First name">
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" name="last_name" value="{{ user.last_name }}" placeholder="Last name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" name="email" value="{{ user.email }}" placeholder="Email">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="text" name="phone" value="{{ user.phone }}" placeholder="e.g. +91 98765 43210">
+        </div>
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea name="bio" rows="3" style="resize:vertical;" placeholder="Tell us a little about yourself...">{{ user.bio }}</textarea>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+          <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

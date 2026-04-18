@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}User Management — Tuck In{% endblock %}
+{% block page_title %}User Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">All Users</div>
+    <div class="page-subtitle">{{ users.count }} registered users in the system</div>
+  </div>
+</div>
+<div class="card">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Joined</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:34px;height:34px;background:linear-gradient(135deg,#1e3a7a,#3b6dd4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;">
+                {{ u.username|first|upper }}
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:13.5px;">{{ u.username }}</div>
+                <div style="font-size:11.5px;color:#7a93be;">{{ u.get_full_name }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="color:#7a93be;font-size:13px;">{{ u.email|default:"—" }}</td>
+          <td>
+            <span class="badge-status
+              {% if u.role == 'admin' %}status-in_progress
+              {% elif u.role == 'agent' %}status-resolved
+              {% else %}status-open{% endif %}">
+              {{ u.role|title }}
+            </span>
+          </td>
+          <td>
+            {% if u.is_active %}
+            <span style="color:#15803d;font-size:12px;font-weight:600;"><i class="fas fa-circle" style="font-size:8px;"></i> Active</span>
+            {% else %}
+            <span style="color:#7a93be;font-size:12px;font-weight:600;"><i class="fas fa-circle" style="font-size:8px;"></i> Inactive</span>
+            {% endif %}
+          </td>
+          <td style="color:#7a93be;font-size:12.5px;">{{ u.date_joined|date:"d M Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <h3>No users found</h3>
+          </div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

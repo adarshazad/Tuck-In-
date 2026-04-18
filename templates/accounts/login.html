@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Tuck In</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Plus Jakarta Sans',sans-serif; min-height:100vh; display:flex; background:#f8faff; }
+.split-left { width:420px; background:linear-gradient(160deg,#0a1628,#1a2f5e); display:flex; flex-direction:column; justify-content:center; padding:48px; position:relative; overflow:hidden; flex-shrink:0; }
+.split-left::before { content:''; position:absolute; top:-100px; right:-100px; width:300px; height:300px; background:radial-gradient(circle,rgba(59,109,212,0.3) 0%,transparent 70%); }
+.auth-logo { display:flex; align-items:center; gap:12px; margin-bottom:48px; text-decoration:none; }
+.auth-logo-icon { width:42px; height:42px; background:linear-gradient(135deg,#3b6dd4,#00c9b1); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; color:white; }
+.auth-logo-text { font-size:18px; font-weight:800; color:white; }
+.split-tagline { font-size:28px; font-weight:800; color:white; line-height:1.3; margin-bottom:16px; }
+.split-tagline span { color:#6b99e8; }
+.split-desc { font-size:14px; color:rgba(255,255,255,0.55); line-height:1.8; }
+.split-right { flex:1; display:flex; align-items:center; justify-content:center; padding:32px; }
+.auth-form-box { width:100%; max-width:400px; }
+.auth-title { font-size:24px; font-weight:800; color:#0a1628; margin-bottom:6px; }
+.auth-subtitle { font-size:13.5px; color:#7a93be; margin-bottom:32px; }
+.form-group { margin-bottom:16px; }
+label { display:block; font-size:13px; font-weight:600; color:#1e3a7a; margin-bottom:6px; }
+.input-wrap { position:relative; }
+.input-wrap i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#7a93be; font-size:13px; }
+input[type=text],input[type=password] { width:100%; padding:11px 14px 11px 40px; border:1.5px solid #e4ebf7; border-radius:9px; font-size:13.5px; font-family:inherit; outline:none; transition:border-color .2s; color:#0a1628; background:white; }
+input:focus { border-color:#3b6dd4; box-shadow:0 0 0 3px rgba(59,109,212,.1); }
+.btn-submit { width:100%; padding:12px; background:linear-gradient(135deg,#1e3a7a,#2451a8); color:white; border:none; border-radius:9px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s; margin-top:8px; }
+.btn-submit:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(30,58,122,.3); }
+.auth-footer { text-align:center; margin-top:20px; font-size:13px; color:#7a93be; }
+.auth-footer a { color:#1e3a7a; font-weight:600; text-decoration:none; }
+.errorlist { list-style:none; padding:0; }
+.errorlist li { color:#e85555; font-size:12px; margin-top:4px; }
+@media(max-width:768px){ .split-left{ display:none; } }
+</style>
+</head>
+<body>
+<div class="split-left">
+  <a href="/" class="auth-logo">
+    <div class="auth-logo-icon"><i class="fas fa-headset"></i></div>
+    <div class="auth-logo-text">Tuck In</div>
+  </a>
+  <div class="split-tagline">Your Support<br><span>Command Center</span></div>
+  <div class="split-desc">Manage tickets, resolve issues, and delight customers — all from one place.</div>
+</div>
+<div class="split-right">
+  <div class="auth-form-box">
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-subtitle">Sign in to your account to continue</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Username</label>
+        <div class="input-wrap"><i class="fas fa-user"></i>
+          <input type="text" name="username" placeholder="Enter username" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap"><i class="fas fa-lock"></i>
+          <input type="password" name="password" placeholder="Enter password" required>
+        </div>
+        {% if form.non_field_errors %}<ul class="errorlist">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      <button type="submit" class="btn-submit">Sign In &nbsp;<i class="fas fa-arrow-right"></i></button>
+    </form>
+    <div class="auth-footer">Don't have an account? <a href="{% url 'accounts:register' %}">Register here</a></div>
+  </div>
+</div>
+</body>
+</html>

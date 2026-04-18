@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Tuck In{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#dce8ff; color:#1e3a7a;"><i class="fas fa-ticket"></i></div>
+    <div><div class="stat-value">{{ total_tickets }}</div><div class="stat-label">Total Tickets</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#fef3cd; color:#b45309;"><i class="fas fa-folder-open"></i></div>
+    <div><div class="stat-value">{{ open_tickets }}</div><div class="stat-label">Open</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#e0faf7; color:#0d9488;"><i class="fas fa-spinner"></i></div>
+    <div><div class="stat-value">{{ in_progress }}</div><div class="stat-label">In Progress</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#dcfce7; color:#15803d;"><i class="fas fa-check-circle"></i></div>
+    <div><div class="stat-value">{{ resolved_tickets }}</div><div class="stat-label">Resolved</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Recent Tickets</span>
+    <a href="{% url 'tickets:list' %}" class="btn btn-outline btn-sm">View All</a>
+  </div>
+  <div class="table-wrapper">
+    {% if tickets %}
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Title</th><th>Status</th><th>Created By</th><th>Date</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+        <tr>
+          <td><span style="font-family: JetBrains Mono; font-size:12px; color:#7a93be;">#{{ ticket.id }}</span></td>
+          <td style="font-weight:600;">{{ ticket.title|truncatechars:50 }}</td>
+          <td><span class="badge-status status-{{ ticket.status }}">{{ ticket.get_status_display }}</span></td>
+          <td>{{ ticket.created_by.username }}</td>
+          <td style="color:#7a93be; font-size:12.5px;">{{ ticket.created_at|date:"d M Y" }}</td>
+          <td><a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-outline btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-ticket"></i>
+      <h3>No tickets yet</h3>
+      <p>Create your first support ticket to get started.</p>
+      <a href="{% url 'tickets:create' %}" class="btn btn-primary" style="margin-top:16px;">Create Ticket</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

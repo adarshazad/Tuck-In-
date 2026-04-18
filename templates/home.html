@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tuck In — Support System</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0a1628; color: white; min-height: 100vh; }
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a1628 0%, #0f2044 50%, #1a2f5e 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(59,109,212,0.25) 0%, transparent 70%);
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: -150px; left: -150px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,201,177,0.15) 0%, transparent 70%);
+  }
+  nav {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 20px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .brand-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, #3b6dd4, #00c9b1);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+  }
+  .brand-name { font-size: 17px; font-weight: 800; color: white; }
+  .nav-links { display: flex; gap: 12px; align-items: center; }
+  .btn-nav {
+    padding: 9px 22px; border-radius: 8px; font-size: 13.5px; font-weight: 600;
+    text-decoration: none; transition: all 0.2s; font-family: inherit; cursor: pointer; border: none;
+  }
+  .btn-ghost { color: rgba(255,255,255,0.75); background: transparent; }
+  .btn-ghost:hover { color: white; }
+  .btn-white { background: white; color: #0f2044; }
+  .btn-white:hover { background: #e8f0fe; transform: translateY(-1px); }
+  .hero-content { text-align: center; z-index: 1; max-width: 680px; padding: 0 24px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(59,109,212,0.2); border: 1px solid rgba(59,109,212,0.4);
+    padding: 6px 16px; border-radius: 20px; font-size: 12.5px; font-weight: 600;
+    color: #6b99e8; margin-bottom: 28px;
+  }
+  .hero-title {
+    font-size: clamp(38px, 6vw, 64px);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+  }
+  .hero-title span { background: linear-gradient(90deg, #3b6dd4, #00c9b1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-desc { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.7; margin-bottom: 40px; }
+  .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-hero-primary {
+    padding: 14px 32px; background: linear-gradient(135deg, #1e3a7a, #2451a8);
+    color: white; border-radius: 10px; font-weight: 700; font-size: 15px;
+    text-decoration: none; transition: all 0.2s; border: 1px solid rgba(59,109,212,0.5);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(36,81,168,0.4); }
+  .btn-hero-outline {
+    padding: 14px 32px; background: rgba(255,255,255,0.06);
+    color: white; border-radius: 10px; font-weight: 600; font-size: 15px;
+    text-decoration: none; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.15);
+  }
+  .btn-hero-outline:hover { background: rgba(255,255,255,0.12); }
+  .features {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px; margin-top: 80px; max-width: 900px; margin-left: auto; margin-right: auto;
+  }
+  .feature-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 24px; text-align: center;
+  }
+  .feature-icon {
+    width: 50px; height: 50px;
+    background: rgba(59,109,212,0.15); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: #6b99e8;
+    margin: 0 auto 14px;
+  }
+  .feature-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .feature-desc { font-size: 12.5px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+</style>
+</head>
+<body>
+<section class="hero">
+  <nav>
+    <a href="/" class="brand">
+      <div class="brand-icon"><i class="fas fa-headset"></i></div>
+      <div class="brand-name">Tuck In</div>
+    </a>
+    <div class="nav-links">
+      <a href="{% url 'accounts:login' %}" class="btn-nav btn-ghost">Sign In</a>
+      <a href="{% url 'accounts:register' %}" class="btn-nav btn-white">Get Started</a>
+    </div>
+  </nav>
+  <div>
+    <div class="hero-content">
+      <div class="hero-badge"><i class="fas fa-bolt"></i> Chat-Based Support Platform</div>
+      <h1 class="hero-title">Resolve Issues <span>Faster & Smarter</span></h1>
+      <p class="hero-desc">A complete helpdesk system with ticket management, knowledge base, and analytics. Built for teams that care about customer experience.</p>
+      <div class="hero-actions">
+        <a href="{% url 'accounts:register' %}" class="btn-hero-primary"><i class="fas fa-rocket"></i> Get Started Free</a>
+        <a href="{% url 'accounts:login' %}" class="btn-hero-outline">Sign In</a>
+      </div>
+    </div>
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-ticket"></i></div>
+        <div class="feature-title">Ticket Management</div>
+        <div class="feature-desc">Create, assign, and track support tickets with priorities and status.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-book-open"></i></div>
+        <div class="feature-title">Knowledge Base</div>
+        <div class="feature-desc">Build an FAQ library to help users find answers instantly.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
+        <div class="feature-title">Analytics</div>
+        <div class="feature-desc">Track performance trends and resolution times with visual charts.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-users"></i></div>
+        <div class="feature-title">Role-Based Access</div>
+        <div class="feature-desc">Admin, Agent, and User roles with granular permissions.</div>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

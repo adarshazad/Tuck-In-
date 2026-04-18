@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}#{{ ticket.id }} — {{ ticket.title }}{% endblock %}
+{% block page_title %}Ticket #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;">
+
+  <!-- Left: Main content -->
+  <div>
+    <!-- Ticket Card -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div>
+          <div class="card-title" style="font-size:17px;">{{ ticket.title }}</div>
+          <div style="margin-top:6px;display:flex;gap:8px;align-items:center;">
+            <span class="badge-status status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          {% if request.user.role in 'admin,agent' or ticket.created_by == request.user %}
+          <a href="{% url 'tickets:update' ticket.pk %}" class="btn btn-outline btn-sm"><i class="fas fa-pen"></i> Edit</a>
+          {% endif %}
+          {% if request.user.role == 'admin' or ticket.created_by == request.user %}
+          <a href="{% url 'tickets:delete' ticket.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this ticket?')"><i class="fas fa-trash"></i></a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="font-size:14px;line-height:1.8;color:#3d5480;white-space:pre-wrap;">{{ ticket.description }}</div>
+      </div>
+    </div>
+
+    <!-- Comments -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fas fa-comments" style="color:#3b6dd4;margin-right:8px;"></i>Comments ({{ ticket.comments.count }})</span>
+      </div>
+      <div class="card-body">
+        {% for comment in ticket.comments.all %}
+        <div class="comment">
+          <div class="comment-avatar">{{ comment.author.username|first|upper }}</div>
+          <div style="flex:1;">
+            <div class="comment-meta">
+              <strong>{{ comment.author.username }}</strong>
+              &nbsp;·&nbsp; {{ comment.created_at|date:"d M Y, H:i" }}
+              {% if comment.author.role != 'user' %}
+              <span style="background:#dce8ff;color:#1e3a7a;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;">{{ comment.author.role|title }}</span>
+              {% endif %}
+            </div>
+            <div class="comment-body">{{ comment.content }}</div>
+          </div>
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:28px;color:#7a93be;font-size:13.5px;">
+          <i class="fas fa-comment-slash" style="font-size:28px;display:block;margin-bottom:10px;opacity:0.4;"></i>
+          No comments yet. Be the first to reply.
+        </div>
+        {% endfor %}
+
+        <hr class="divider">
+        <div style="font-size:13.5px;font-weight:600;color:#1e3a7a;margin-bottom:10px;">Add a Comment</div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <textarea name="content" rows="3" placeholder="Write your response here..." required
+              style="width:100%;padding:10px 14px;border:1.5px solid #e4ebf7;border-radius:8px;font-size:13.5px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Post Comment</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Details sidebar -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Ticket Details</span></div>
+      <div class="card-body" style="padding:16px;">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#7a93be;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Created By</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:28px;height:28px;background:#1e3a7a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">{{ ticket.created_by.username|first|upper }}</div>
+              <span style="font-size:13.5px;font-weight:600;">{{ ticket.created_by.username }}</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#7a93be;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Assigned To</div>
+            {% if ticket.assigned_to %}
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:28px;height:28px;background:#2451a8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">{{ ticket.assigned_to.username|first|upper }}</div>
+              <span style="font-size:13.5px;font-weight:600;">{{ ticket.assigned_to.username }}</span>
+            </div>
+            {% else %}
+            <span style="color:#c8d8f0;font-size:13px;">Unassigned</span>
+            {% endif %}
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#7a93be;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Status</div>
+            <span class="badge-status status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#7a93be;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Created</div>
+            <div style="font-size:13px;color:#3d5480;">{{ ticket.created_at|date:"d M Y, H:i" }}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#7a93be;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Last Updated</div>
+            <div style="font-size:13px;color:#3d5480;">{{ ticket.updated_at|date:"d M Y, H:i" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a href="{% url 'tickets:list' %}" class="btn btn-outline" style="justify-content:center;">
+      <i class="fas fa-arrow-left"></i> Back to Tickets
+    </a>
+  </div>
+</div>
+
+{% block extra_css %}
+<style>
+@media(max-width:800px){
+  div[style*="grid-template-columns:1fr 300px"]{ display:block!important; }
+}
+</style>
+{% endblock %}
+{% endblock %}

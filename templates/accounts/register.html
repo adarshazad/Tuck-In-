@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — Tuck In</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Plus Jakarta Sans',sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f8faff; padding:24px; }
+.register-box { width:100%; max-width:480px; }
+.register-logo { display:flex; align-items:center; gap:12px; margin-bottom:28px; text-decoration:none; }
+.register-logo-icon { width:42px; height:42px; background:linear-gradient(135deg,#0f2044,#2451a8); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; color:white; }
+.register-logo-text { font-size:18px; font-weight:800; color:#0a1628; }
+.register-title { font-size:24px; font-weight:800; color:#0a1628; margin-bottom:6px; }
+.register-subtitle { font-size:13.5px; color:#7a93be; margin-bottom:24px; }
+.form-card { background:white; border-radius:14px; border:1px solid #e4ebf7; padding:28px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-group { margin-bottom:14px; }
+label { display:block; font-size:12.5px; font-weight:600; color:#1e3a7a; margin-bottom:5px; }
+input { width:100%; padding:10px 14px; border:1.5px solid #e4ebf7; border-radius:8px; font-size:13px; font-family:inherit; outline:none; transition:border-color .2s; color:#0a1628; }
+input:focus { border-color:#3b6dd4; box-shadow:0 0 0 3px rgba(59,109,212,.1); }
+.btn-submit { width:100%; padding:12px; background:linear-gradient(135deg,#0f2044,#2451a8); color:white; border:none; border-radius:9px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s; margin-top:6px; }
+.btn-submit:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(15,32,68,.3); }
+.auth-footer { text-align:center; margin-top:16px; font-size:13px; color:#7a93be; }
+.auth-footer a { color:#1e3a7a; font-weight:600; text-decoration:none; }
+.errorlist { list-style:none; padding:0; }
+.errorlist li { color:#e85555; font-size:11.5px; margin-top:3px; }
+@media(max-width:500px){ .form-row{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="register-box">
+  <a href="/" class="register-logo">
+    <div class="register-logo-icon"><i class="fas fa-headset"></i></div>
+    <div class="register-logo-text">Tuck In</div>
+  </a>
+  <div class="register-title">Create an account</div>
+  <div class="register-subtitle">Join Tuck In to submit and track support tickets</div>
+  <div class="form-card">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" name="first_name" placeholder="First name">
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" name="last_name" placeholder="Last name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" required placeholder="Choose a username">
+        {% if form.username.errors %}<ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" required placeholder="Your email address">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password1" required placeholder="Create password">
+          {% if form.password1.errors %}<ul class="errorlist">{% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" name="password2" required placeholder="Repeat password">
+          {% if form.password2.errors %}<ul class="errorlist">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+      </div>
+      <button type="submit" class="btn-submit">Create Account &nbsp;<i class="fas fa-arrow-right"></i></button>
+    </form>
+  </div>
+  <div class="auth-footer">Already have an account? <a href="{% url 'accounts:login' %}">Sign in here</a></div>
+</div>
+</body>
+</html>
