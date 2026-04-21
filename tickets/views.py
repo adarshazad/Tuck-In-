@@ -12,7 +12,8 @@ def ticket_list(request):
     if user.role == 'admin':
         tickets = Ticket.objects.all()
     elif user.role == 'agent':
-        tickets = Ticket.objects.filter(assigned_to=user)
+        from django.db.models import Q
+        tickets = Ticket.objects.filter(Q(assigned_to=user) | Q(assigned_to__isnull=True))
     else:
         tickets = Ticket.objects.filter(created_by=user)
 

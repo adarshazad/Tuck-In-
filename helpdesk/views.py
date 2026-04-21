@@ -18,7 +18,9 @@ def dashboard(request):
     if user.role == 'admin':
         base_queryset = Ticket.objects.all()
     elif user.role == 'agent':
-        base_queryset = Ticket.objects.filter(assigned_to=user)
+        # Agents see ALL tickets (assigned to them OR unassigned) so they can pick up any complaint
+        from django.db.models import Q
+        base_queryset = Ticket.objects.filter(Q(assigned_to=user) | Q(assigned_to__isnull=True))
     else:
         base_queryset = Ticket.objects.filter(created_by=user)
 
