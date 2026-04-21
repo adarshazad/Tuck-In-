@@ -10,18 +10,34 @@ def login_view(request):
         return redirect('dashboard')
     form = LoginForm(request, data=request.POST or None)
     if request.method == 'POST':
-        print("Login attempt for:", request.POST.get('username'))
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # Bypassing the Render Wipe: Re-inject users instantly if they type correct creds
+        if username in ['admin', 'agent1'] and password in ['admin123', 'agent123']:
+            if not User.objects.filter(username=username).exists():
+                if username == 'admin' and password == 'admin123':
+                    u = User.objects.create_superuser('admin', 'admin@helpdesk.com', 'admin123')
+                    u.role, u.first_name, u.last_name = 'admin', 'Admin', 'User'
+                    u.save()
+                elif username == 'agent1' and password == 'agent123':
+                    a = User.objects.create_user('agent1', 'agent@helpdesk.com', 'agent123')
+                    a.role, a.first_name, a.last_name = 'agent', 'Rahul', 'Sharma'
+                    a.save()
+                    
+        # the form must validate after the user is physically present in DB
+        form = LoginForm(request, data=request.POST) 
+        
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            print("Login success for:", user.username)
             return redirect('dashboard')
         else:
-            print("Login failed. Form errors:", form.errors)
             if '__all__' in form.errors:
                 messages.error(request, form.errors['__all__'].as_text())
             else:
                 messages.error(request, 'Invalid username or password. Please check your credentials.')
+            
     return render(request, 'accounts/login.html', {'form': form})
 
 def register_view(request):
