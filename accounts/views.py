@@ -6,48 +6,48 @@ from .forms import RegisterForm, LoginForm, ProfileForm
 from .models import User
 
 def login_view(request):
-    if request.user.is_authenticated:
+    # If already logged in and this is a GET request, redirect to dashboard
+    if request.user.is_authenticated and request.method == 'GET':
         return redirect('dashboard')
+
     form = LoginForm(request, data=request.POST or None)
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        
-        # Bypassing the Render Wipe: Re-inject users instantly if they type correct creds
-        HARDCODED_USERS = {
-            'admin':  ('admin123',  'superuser', 'admin',  'Admin',  'User',    'admin@helpdesk.com'),
-            'agent1': ('agent123',  'user',      'agent',  'Rahul',  'Sharma',  'agent1@helpdesk.com'),
-            'agent2': ('agent456',  'user',      'agent',  'Priya',  'Verma',   'agent2@helpdesk.com'),
-            'agent3': ('agent789',  'user',      'agent',  'Amit',   'Khanna',  'agent3@helpdesk.com'),
-        }
-        if username in HARDCODED_USERS:
-            pw, utype, role, first, last, email = HARDCODED_USERS[username]
-            from accounts.models import User
-            if password == pw:
-                if not User.objects.filter(username=username).exists():
-                    if utype == 'superuser':
-                        u = User.objects.create_superuser(username, email, pw)
-                    else:
-                        u = User.objects.create_user(username, email, pw)
-                    u.role, u.first_name, u.last_name = role, first, last
-                    u.save()
-                # FORCE LOGIN BYPASSING AuthForm completely
-                user_obj = User.objects.get(username=username)
-                login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
-                return redirect('dashboard')
 
-        # Normal fallback for other users
-        form = LoginForm(request, data=request.POST) 
-        
+        # If someone is already logged in, log them out first before switching
+        if request.user.is_authenticated:
+            logout(request)
+
+        # Auto-provisioning: Re-inject hardcoded staff users if Render wiped the DB
+        HARDCODED_USERS = {
+            'admin':  ('admin123', 'superuser', 'admin', 'Admin',  'User',   'admin@helpdesk.com'),
+            'agent1': ('agent123', 'user',      'agent', 'Rahul',  'Sharma', 'agent1@helpdesk.com'),
+            'agent2': ('agent456', 'user',      'agent', 'Priya',  'Verma',  'agent2@helpdesk.com'),
+            'agent3': ('agent789', 'user',      'agent', 'Amit',   'Khanna', 'agent3@helpdesk.com'),
+        }
+        if username in HARDCODED_USERS and password == HARDCODED_USERS[username][0]:
+            pw, utype, role, first, last, email = HARDCODED_USERS[username]
+            if not User.objects.filter(username=username).exists():
+                if utype == 'superuser':
+                    u = User.objects.create_superuser(username, email, pw)
+                else:
+                    u = User.objects.create_user(username, email, pw)
+                u.role, u.first_name, u.last_name = role, first, last
+                u.save()
+            user_obj = User.objects.get(username=username)
+            login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
+            return redirect('dashboard')
+
+        # Normal login for regular registered users
+        form = LoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             return redirect('dashboard')
         else:
-            if '__all__' in form.errors:
-                messages.error(request, form.errors['__all__'].as_text())
-            else:
-                messages.error(request, 'Invalid username or password. Please check your credentials.')
+            messages.error(request, 'Incorrect username or password. Please try again.')
+
             
     return render(request, 'accounts/login.html', {'form': form})
 
