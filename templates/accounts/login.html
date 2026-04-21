@@ -56,13 +56,17 @@ input:focus { border-color:#3b6dd4; box-shadow:0 0 0 3px rgba(59,109,212,.1); }
           <input type="text" name="username" placeholder="Enter username" required>
         </div>
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <div class="input-wrap"><i class="fas fa-lock"></i>
-          <input type="password" name="password" placeholder="Enter password" required>
+        {% if login_error %}
+        <div style="background:#ffeaea;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:12px;color:#b91c1c;font-size:13px;display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-exclamation-circle"></i> {{ login_error }}
         </div>
-        {% if form.non_field_errors %}<ul class="errorlist">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-      </div>
+        {% endif %}
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrap"><i class="fas fa-lock"></i>
+            <input type="password" name="password" placeholder="Enter password" required>
+          </div>
+        </div>
       <button type="submit" class="btn-submit">Sign In &nbsp;<i class="fas fa-arrow-right"></i></button>
     </form>
     <div class="auth-footer">Don't have an account? <a href="{% url 'accounts:register' %}">Register here</a></div>

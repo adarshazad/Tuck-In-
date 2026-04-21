@@ -40,37 +40,43 @@ def login_view(request):
     if request.user.is_authenticated and request.method == 'GET':
         return redirect('dashboard')
 
+    login_error = None  # will be shown inline in the template
+
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
 
-        # Always clear any existing session before a new login attempt
+        # Clear any stale session before a new login attempt
         if request.user.is_authenticated:
             logout(request)
 
         # ── HARDCODED STAFF USERS ─────────────────────────────────────────
-        # These bypass form validation entirely so Render DB wipes never matter
         if username in HARDCODED_USERS:
             if password == HARDCODED_USERS[username]['password']:
                 user_obj = _ensure_hardcoded_user(username)
+                # Purge any pending messages so they don't show on dashboard
+                list(messages.get_messages(request))
                 login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
                 return redirect('dashboard')
             else:
-                # Correct username but wrong password
-                messages.error(request, 'Incorrect password for this account.')
-                return render(request, 'accounts/login.html', {'form': LoginForm(request)})
+                login_error = 'Incorrect password. Please try again.'
 
-        # ── REGULAR REGISTERED USERS ──────────────────────────────────────
-        form = LoginForm(request, data=request.POST)
-        if form.is_valid():
-            login(request, form.get_user())
-            return redirect('dashboard')
         else:
-            messages.error(request, 'Incorrect username or password. Please try again.')
-            return render(request, 'accounts/login.html', {'form': form})
+            # ── REGULAR REGISTERED USERS ──────────────────────────────────
+            form = LoginForm(request, data=request.POST)
+            if form.is_valid():
+                # Purge any pending messages so they don't show on dashboard
+                list(messages.get_messages(request))
+                login(request, form.get_user())
+                return redirect('dashboard')
+            else:
+                login_error = 'Incorrect username or password. Please try again.'
 
-    # GET request – show blank login form
-    return render(request, 'accounts/login.html', {'form': LoginForm(request)})
+    return render(request, 'accounts/login.html', {
+        'form': LoginForm(request),
+        'login_error': login_error,
+    })
+
 
 
 def register_view(request):
