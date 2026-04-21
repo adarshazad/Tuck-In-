@@ -14,22 +14,27 @@ def login_view(request):
         password = request.POST.get('password')
         
         # Bypassing the Render Wipe: Re-inject users instantly if they type correct creds
-        if username in ['admin', 'agent1'] and password in ['admin123', 'agent123']:
+        HARDCODED_USERS = {
+            'admin':  ('admin123',  'superuser', 'admin',  'Admin',  'User',    'admin@helpdesk.com'),
+            'agent1': ('agent123',  'user',      'agent',  'Rahul',  'Sharma',  'agent1@helpdesk.com'),
+            'agent2': ('agent456',  'user',      'agent',  'Priya',  'Verma',   'agent2@helpdesk.com'),
+            'agent3': ('agent789',  'user',      'agent',  'Amit',   'Khanna',  'agent3@helpdesk.com'),
+        }
+        if username in HARDCODED_USERS:
+            pw, utype, role, first, last, email = HARDCODED_USERS[username]
             from accounts.models import User
-            if not User.objects.filter(username=username).exists():
-                if username == 'admin' and password == 'admin123':
-                    u = User.objects.create_superuser('admin', 'admin@helpdesk.com', 'admin123')
-                    u.role, u.first_name, u.last_name = 'admin', 'Admin', 'User'
+            if password == pw:
+                if not User.objects.filter(username=username).exists():
+                    if utype == 'superuser':
+                        u = User.objects.create_superuser(username, email, pw)
+                    else:
+                        u = User.objects.create_user(username, email, pw)
+                    u.role, u.first_name, u.last_name = role, first, last
                     u.save()
-                elif username == 'agent1' and password == 'agent123':
-                    a = User.objects.create_user('agent1', 'agent@helpdesk.com', 'agent123')
-                    a.role, a.first_name, a.last_name = 'agent', 'Rahul', 'Sharma'
-                    a.save()
-            
-            # FORCE LOGIN BYPASSING AuthForm completely
-            user_obj = User.objects.get(username=username)
-            login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect('dashboard')
+                # FORCE LOGIN BYPASSING AuthForm completely
+                user_obj = User.objects.get(username=username)
+                login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
+                return redirect('dashboard')
 
         # Normal fallback for other users
         form = LoginForm(request, data=request.POST) 

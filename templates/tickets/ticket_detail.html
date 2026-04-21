@@ -111,6 +111,43 @@
       </div>
     </div>
 
+    {% if request.user.role in 'admin,agent' %}
+    <div class="card" style="border:2px solid #e4ebf7;">
+      <div class="card-header" style="background:#f8faff;">
+        <span class="card-title"><i class="fas fa-tools" style="color:#3b6dd4;margin-right:8px;"></i>Actions</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px;padding:16px;">
+        {% if ticket.status != 'in_progress' %}
+        <a href="{% url 'tickets:update' ticket.pk %}" onclick="this.href=''; fetch('{% url 'tickets:update' ticket.pk %}', {method:'GET'}); this.closest('form') || document.createElement('form');"
+           class="btn btn-outline" style="justify-content:center;background:#dce8ff;border-color:#3b6dd4;color:#1e3a7a;">
+          <i class="fas fa-spinner"></i> Mark In Progress
+        </a>
+        {% endif %}
+        {% if ticket.status != 'resolved' %}
+        <form method="post" action="{% url 'tickets:resolve' ticket.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;background:#22c55e;border:none;">
+            <i class="fas fa-check-circle"></i> Mark Resolved
+          </button>
+        </form>
+        {% endif %}
+        {% if ticket.status != 'closed' %}
+        <form method="post" action="{% url 'tickets:close' ticket.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center;"
+            onclick="return confirm('Close this ticket permanently?')">
+            <i class="fas fa-lock"></i> Close Ticket
+          </button>
+        </form>
+        {% else %}
+        <span style="text-align:center;font-size:13px;color:#7a93be;padding:8px 0;">
+          <i class="fas fa-lock"></i> Ticket is closed
+        </span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
     <a href="{% url 'tickets:list' %}" class="btn btn-outline" style="justify-content:center;">
       <i class="fas fa-arrow-left"></i> Back to Tickets
     </a>

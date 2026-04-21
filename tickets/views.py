@@ -72,3 +72,27 @@ def ticket_delete(request, pk):
         ticket.delete()
         messages.success(request, 'Ticket deleted.')
     return redirect('tickets:list')
+
+@login_required
+def ticket_close(request, pk):
+    """Quickly close a ticket — admin/agent only."""
+    ticket = get_object_or_404(Ticket, pk=pk)
+    if request.user.role not in ['admin', 'agent']:
+        messages.error(request, 'Permission denied.')
+        return redirect('tickets:detail', pk=pk)
+    ticket.status = 'closed'
+    ticket.save()
+    messages.success(request, f'Ticket #{ticket.id} has been closed.')
+    return redirect('tickets:detail', pk=pk)
+
+@login_required
+def ticket_resolve(request, pk):
+    """Mark ticket as resolved — admin/agent only."""
+    ticket = get_object_or_404(Ticket, pk=pk)
+    if request.user.role not in ['admin', 'agent']:
+        messages.error(request, 'Permission denied.')
+        return redirect('tickets:detail', pk=pk)
+    ticket.status = 'resolved'
+    ticket.save()
+    messages.success(request, f'Ticket #{ticket.id} marked as resolved.')
+    return redirect('tickets:detail', pk=pk)

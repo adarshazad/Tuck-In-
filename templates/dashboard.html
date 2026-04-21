@@ -24,7 +24,9 @@
 
 <div class="card">
   <div class="card-header">
-    <span class="card-title">Recent Tickets</span>
+    <span class="card-title">
+      {% if user.role == 'admin' %}All Tickets{% elif user.role == 'agent' %}My Assigned Tickets{% else %}My Complaints{% endif %}
+    </span>
     <a href="{% url 'tickets:list' %}" class="btn btn-outline btn-sm">View All</a>
   </div>
   <div class="table-wrapper">
@@ -32,16 +34,27 @@
     <table>
       <thead>
         <tr>
-          <th>#</th><th>Title</th><th>Status</th><th>Created By</th><th>Date</th><th>Action</th>
+          <th>#</th><th>Title</th><th>Status</th><th>{% if user.role != 'user' %}Created By{% else %}Assigned To{% endif %}</th><th>Date</th><th>Action</th>
         </tr>
       </thead>
       <tbody>
         {% for ticket in tickets %}
-        <tr>
+        <tr {% if ticket.status == 'closed' %}style="opacity:0.65;"{% endif %}>
           <td><span style="font-family: JetBrains Mono; font-size:12px; color:#7a93be;">#{{ ticket.id }}</span></td>
-          <td style="font-weight:600;">{{ ticket.title|truncatechars:50 }}</td>
+          <td style="font-weight:600;">
+            {{ ticket.title|truncatechars:50 }}
+            {% if ticket.status == 'closed' %}
+            <span style="font-size:10px;background:#f1f5fb;color:#7a93be;padding:2px 6px;border-radius:8px;margin-left:4px;">Closed</span>
+            {% endif %}
+          </td>
           <td><span class="badge-status status-{{ ticket.status }}">{{ ticket.get_status_display }}</span></td>
-          <td>{{ ticket.created_by.username }}</td>
+          <td>
+            {% if user.role != 'user' %}
+              {{ ticket.created_by.username }}
+            {% else %}
+              {% if ticket.assigned_to %}{{ ticket.assigned_to.username }}{% else %}<span style="color:#c8d8f0;">Unassigned</span>{% endif %}
+            {% endif %}
+          </td>
           <td style="color:#7a93be; font-size:12.5px;">{{ ticket.created_at|date:"d M Y" }}</td>
           <td><a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-outline btn-sm">View</a></td>
         </tr>
@@ -61,3 +74,4 @@
   </div>
 </div>
 {% endblock %}
+
