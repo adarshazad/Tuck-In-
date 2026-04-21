@@ -26,6 +26,10 @@ def ticket_list(request):
 
 @login_required
 def ticket_create(request):
+    if request.user.role == 'admin':
+        messages.error(request, "Admins cannot create tickets. They can only resolve them.")
+        return redirect('dashboard')
+    
     form = TicketForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         ticket = form.save(commit=False)

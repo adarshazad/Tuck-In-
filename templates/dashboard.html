@@ -52,8 +52,10 @@
     <div class="empty-state">
       <i class="fas fa-ticket"></i>
       <h3>No tickets yet</h3>
-      <p>Create your first support ticket to get started.</p>
+      <p>{% if user.role == 'admin' %}Users haven't created any tickets yet.{% else %}Create your first support ticket to get started.{% endif %}</p>
+      {% if user.role != 'admin' %}
       <a href="{% url 'tickets:create' %}" class="btn btn-primary" style="margin-top:16px;">Create Ticket</a>
+      {% endif %}
     </div>
     {% endif %}
   </div>

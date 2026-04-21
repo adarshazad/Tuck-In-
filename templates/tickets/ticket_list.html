@@ -8,9 +8,11 @@
     <div class="page-title">Support Tickets</div>
     <div class="page-subtitle">Manage and track all support requests</div>
   </div>
+  {% if user.role != 'admin' %}
   <a href="{% url 'tickets:create' %}" class="btn btn-primary">
     <i class="fas fa-plus"></i> New Ticket
   </a>
+  {% endif %}
 </div>
 
 <form method="get" class="filter-bar">
@@ -82,9 +84,11 @@
       <i class="fas fa-ticket"></i>
       <h3>No tickets found</h3>
       <p>{% if status_filter %}Try adjusting your filters.{% else %}Create your first ticket to get started.{% endif %}</p>
+      {% if user.role != 'admin' %}
       <a href="{% url 'tickets:create' %}" class="btn btn-primary" style="margin-top:16px;display:inline-flex;">
         <i class="fas fa-plus"></i> Create Ticket
       </a>
+      {% endif %}
     </div>
     {% endif %}
   </div>

@@ -18,6 +18,10 @@ def login_view(request):
             return redirect('dashboard')
         else:
             print("Login failed. Form errors:", form.errors)
+            if '__all__' in form.errors:
+                messages.error(request, form.errors['__all__'].as_text())
+            else:
+                messages.error(request, 'Invalid username or password. Please check your credentials.')
     return render(request, 'accounts/login.html', {'form': form})
 
 def register_view(request):

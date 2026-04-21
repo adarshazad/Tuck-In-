@@ -619,9 +619,11 @@
     <header class="topbar">
         <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
         <div class="topbar-actions">
+            {% if user.role != 'admin' %}
             <a href="{% url 'tickets:create' %}" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus"></i> New Ticket
             </a>
+            {% endif %}
             <a href="{% url 'accounts:logout' %}" class="btn btn-outline btn-sm">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
