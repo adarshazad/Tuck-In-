@@ -25,7 +25,7 @@
 <div class="card">
   <div class="card-header">
     <span class="card-title">
-      {% if user.role == 'admin' %}All Tickets{% elif user.role == 'agent' %}My Assigned Tickets{% else %}My Complaints{% endif %}
+      {% if user.role == 'admin' %}All Tickets{% elif user.role == 'agent' %}Available & Assigned Tickets{% else %}My Complaints{% endif %}
     </span>
     <a href="{% url 'tickets:list' %}" class="btn btn-outline btn-sm">View All</a>
   </div>
@@ -65,7 +65,7 @@
     <div class="empty-state">
       <i class="fas fa-ticket"></i>
       <h3>No tickets yet</h3>
-      <p>{% if user.role == 'admin' %}Users haven't created any tickets yet.{% elif user.role == 'agent' %}No tickets have been assigned to you yet.{% else %}Create your first support ticket to get started.{% endif %}</p>
+      <p>{% if user.role == 'admin' %}Users haven't created any tickets yet.{% elif user.role == 'agent' %}No tickets available right now.{% else %}Create your first support ticket to get started.{% endif %}</p>
       {% if user.role == 'user' %}
       <a href="{% url 'tickets:create' %}" class="btn btn-primary" style="margin-top:16px;">Create Ticket</a>
       {% endif %}
