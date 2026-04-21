@@ -9,10 +9,15 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     form = LoginForm(request, data=request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        user = form.get_user()
-        login(request, user)
-        return redirect('dashboard')
+    if request.method == 'POST':
+        print("Login attempt for:", request.POST.get('username'))
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            print("Login success for:", user.username)
+            return redirect('dashboard')
+        else:
+            print("Login failed. Form errors:", form.errors)
     return render(request, 'accounts/login.html', {'form': form})
 
 def register_view(request):
