@@ -619,7 +619,7 @@
     <header class="topbar">
         <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
         <div class="topbar-actions">
-            {% if user.role != 'admin' %}
+            {% if user.role == 'user' %}
             <a href="{% url 'tickets:create' %}" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus"></i> New Ticket
             </a>

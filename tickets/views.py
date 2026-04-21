@@ -26,8 +26,8 @@ def ticket_list(request):
 
 @login_required
 def ticket_create(request):
-    if request.user.role == 'admin':
-        messages.error(request, "Admins cannot create tickets. They can only resolve them.")
+    if request.user.role in ['admin', 'agent']:
+        messages.error(request, "Only clients can create tickets. Admins and agents can only view and resolve them.")
         return redirect('dashboard')
     
     form = TicketForm(request.POST or None)
