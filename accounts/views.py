@@ -5,51 +5,73 @@ from django.contrib import messages
 from .forms import RegisterForm, LoginForm, ProfileForm
 from .models import User
 
+HARDCODED_USERS = {
+    'admin':  {'password': 'admin123', 'type': 'superuser', 'role': 'admin',  'first': 'Admin',  'last': 'User',   'email': 'admin@helpdesk.com'},
+    'agent1': {'password': 'agent123', 'type': 'user',      'role': 'agent',  'first': 'Rahul',  'last': 'Sharma', 'email': 'agent1@helpdesk.com'},
+    'agent2': {'password': 'agent456', 'type': 'user',      'role': 'agent',  'first': 'Priya',  'last': 'Verma',  'email': 'agent2@helpdesk.com'},
+    'agent3': {'password': 'agent789', 'type': 'user',      'role': 'agent',  'first': 'Amit',   'last': 'Khanna', 'email': 'agent3@helpdesk.com'},
+}
+
+def _ensure_hardcoded_user(username):
+    """Create the hardcoded user if missing, return the user object."""
+    info = HARDCODED_USERS[username]
+    if not User.objects.filter(username=username).exists():
+        if info['type'] == 'superuser':
+            u = User.objects.create_superuser(username, info['email'], info['password'])
+        else:
+            u = User.objects.create_user(username, info['email'], info['password'])
+        u.role       = info['role']
+        u.first_name = info['first']
+        u.last_name  = info['last']
+        u.is_active  = True
+        u.save()
+    else:
+        # Ensure password is always correct even if it drifted
+        u = User.objects.get(username=username)
+        if not u.check_password(info['password']):
+            u.set_password(info['password'])
+        u.role = info['role']
+        u.is_active = True
+        u.save()
+    return User.objects.get(username=username)
+
 def login_view(request):
-    # If already logged in and this is a GET request, redirect to dashboard
+    # GET: if already logged in, go to dashboard
     if request.user.is_authenticated and request.method == 'GET':
         return redirect('dashboard')
 
-    form = LoginForm(request, data=request.POST or None)
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
 
-        # If someone is already logged in, log them out first before switching
+        # Always clear any existing session before a new login attempt
         if request.user.is_authenticated:
             logout(request)
 
-        # Auto-provisioning: Re-inject hardcoded staff users if Render wiped the DB
-        HARDCODED_USERS = {
-            'admin':  ('admin123', 'superuser', 'admin', 'Admin',  'User',   'admin@helpdesk.com'),
-            'agent1': ('agent123', 'user',      'agent', 'Rahul',  'Sharma', 'agent1@helpdesk.com'),
-            'agent2': ('agent456', 'user',      'agent', 'Priya',  'Verma',  'agent2@helpdesk.com'),
-            'agent3': ('agent789', 'user',      'agent', 'Amit',   'Khanna', 'agent3@helpdesk.com'),
-        }
-        if username in HARDCODED_USERS and password == HARDCODED_USERS[username][0]:
-            pw, utype, role, first, last, email = HARDCODED_USERS[username]
-            if not User.objects.filter(username=username).exists():
-                if utype == 'superuser':
-                    u = User.objects.create_superuser(username, email, pw)
-                else:
-                    u = User.objects.create_user(username, email, pw)
-                u.role, u.first_name, u.last_name = role, first, last
-                u.save()
-            user_obj = User.objects.get(username=username)
-            login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect('dashboard')
+        # ── HARDCODED STAFF USERS ─────────────────────────────────────────
+        # These bypass form validation entirely so Render DB wipes never matter
+        if username in HARDCODED_USERS:
+            if password == HARDCODED_USERS[username]['password']:
+                user_obj = _ensure_hardcoded_user(username)
+                login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
+                return redirect('dashboard')
+            else:
+                # Correct username but wrong password
+                messages.error(request, 'Incorrect password for this account.')
+                return render(request, 'accounts/login.html', {'form': LoginForm(request)})
 
-        # Normal login for regular registered users
+        # ── REGULAR REGISTERED USERS ──────────────────────────────────────
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
+            login(request, form.get_user())
             return redirect('dashboard')
         else:
             messages.error(request, 'Incorrect username or password. Please try again.')
+            return render(request, 'accounts/login.html', {'form': form})
 
-            
-    return render(request, 'accounts/login.html', {'form': form})
+    # GET request – show blank login form
+    return render(request, 'accounts/login.html', {'form': LoginForm(request)})
+
 
 def register_view(request):
     form = RegisterForm(request.POST or None)
